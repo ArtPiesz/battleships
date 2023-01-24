@@ -1,14 +1,8 @@
 package com.example.battleships;
 
-
 import javafx.scene.control.Button;
-
+import javafx.scene.control.Label;
 import javafx.scene.layout.*;
-
-
-
-
-
 import static javafx.scene.layout.GridPane.*;
 
 public class BoardView{
@@ -25,6 +19,7 @@ public class BoardView{
     private void createGrid() {
         GridPane playerGrid = new GridPane();
         GridPane enemyGrid = new GridPane();
+        Label spacer = new Label();
         for(int i=0;i<10;i++){
             playerGrid.getColumnConstraints().add(new ColumnConstraints(50));
             playerGrid.getRowConstraints().add(new RowConstraints(50));
@@ -62,6 +57,7 @@ public class BoardView{
             }
         }
         main.setBottom(playerGrid);
+        main.setCenter(spacer);
         main.setTop(enemyGrid);
 
     }
