@@ -1,23 +1,92 @@
 package com.example.battleships;
 
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 
-import java.io.IOException;
+import javafx.scene.control.Button;
 
-public class BoardView extends Application {
-    @Override
-    public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(BoardView.class.getResource("board.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 320, 240);
-        stage.setTitle("Hello!");
-        stage.setScene(scene);
-        stage.show();
+import javafx.scene.layout.*;
+
+
+
+
+
+import static javafx.scene.layout.GridPane.*;
+
+public class BoardView{
+    private BorderPane main;
+    public BoardView(){
+        main = new BorderPane();
+        main.setStyle("-fx-background-color: grey;");
+        main.setPrefHeight(1000);
+        main.setPrefWidth(700);
+        createGrid();
+        
     }
 
-    public static void main(String[] args) {
-        launch();
+    private void createGrid() {
+        GridPane playerGrid = new GridPane();
+        GridPane enemyGrid = new GridPane();
+        for(int i=0;i<10;i++){
+            playerGrid.getColumnConstraints().add(new ColumnConstraints(50));
+            playerGrid.getRowConstraints().add(new RowConstraints(50));
+            enemyGrid.getColumnConstraints().add(new ColumnConstraints(50));
+            enemyGrid.getRowConstraints().add(new RowConstraints(50));
+        }
+        for(int i = 0;i<10;i++){
+            for(int j =0;j<10;j++){
+                Button button = new Button();
+                button.setPrefHeight(50);
+                button.setPrefWidth(50);
+                setConstraints(button,j,i);
+                playerGrid.getChildren().add(button);
+
+                button.setOnAction(actionEvent -> {
+                    System.out.println("Row" + getRowIndex(button));
+                    System.out.println("Column" + getColumnIndex(button));
+                    button.setStyle("-fx-background-color: black;");
+                });
+            }
+        }
+        for(int i = 0;i<10;i++){
+            for(int j =0;j<10;j++){
+                Button button = new Button();
+                button.setPrefHeight(50);
+                button.setPrefWidth(50);
+                setConstraints(button,j,i);
+                enemyGrid.getChildren().add(button);
+
+                button.setOnAction(actionEvent -> {
+                    System.out.println("Row" + getRowIndex(button));
+                    System.out.println("Column" + getColumnIndex(button));
+                    button.setStyle("-fx-background-color: black;");
+                });
+            }
+        }
+        main.setBottom(playerGrid);
+        main.setTop(enemyGrid);
+
     }
+
+    public Pane getRoot(){
+        return main;
+
+    }
+
+
+
+
+
+    /*public class Cell extends Rectangle{
+        public int x,y; //position on board
+        public boolean wasHit = false;
+        public Ship isShip = null; // is there a ship on this cell
+        private BoardView board;
+
+        public Cell(int x,int y,BoardView board){
+            this.x = x;
+            this.y = y;
+            this.board = board;
+        }
+    }*/
+
+
 }
