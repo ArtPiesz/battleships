@@ -8,13 +8,13 @@ public class Ship extends Parent {
 
     public Ship(int length,boolean orientation){
         this.length = length;
-        this.orientation = orientation;
+        this.orientation = orientation; //T-vertical F-horizontal
         hp = length;
     }
     public void hit(){
-        if(hp>0) {
+        if(isAlive())
             hp--;
-        }
+
     }
     public boolean isAlive(){
         return hp > 0;
