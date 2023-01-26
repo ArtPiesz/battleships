@@ -11,6 +11,7 @@ import java.util.List;
 
 import static javafx.scene.layout.GridPane.*;
 
+
 public class BoardView{
     private BorderPane main;
     public BoardView(){
@@ -28,9 +29,42 @@ public class BoardView{
 
     }
     private void createGrid() {
+
+        VBox grids = new VBox();
+        grids.setSpacing(25);
+        AnchorPane playerAnchor = new AnchorPane();
+        AnchorPane enemyAnchor = new AnchorPane();
+        AnchorPane menuAnchor = new AnchorPane();
+
         GridPane playerGrid = new GridPane();
+        AnchorPane.setBottomAnchor(playerGrid,0.0);
+        AnchorPane.setLeftAnchor(playerGrid,100.0);
+
+
         GridPane enemyGrid = new GridPane();
-        Label spacer = new Label();
+        AnchorPane.setTopAnchor(enemyGrid,0.0);
+        AnchorPane.setLeftAnchor(enemyGrid,100.0);
+
+
+        VBox menu = new VBox();
+        Label shipChoosing = new Label();
+        shipChoosing.setText("Choose ship lenght: ");
+        menu.getChildren().add(shipChoosing);
+        menu.setSpacing(25);
+        AnchorPane.setTopAnchor(menu,400.0);
+        AnchorPane.setBottomAnchor(menu,400.0);
+        AnchorPane.setLeftAnchor(menu,0.0);
+
+
+
+        for(int i=1; i < 5; i++)
+        {
+            Button shipType = new Button();
+            shipType.setPrefHeight(50);
+            shipType.setPrefWidth(100);
+            shipType.setText(String.valueOf(i+1));
+            menu.getChildren().add(shipType);
+        }
         for(int i=0;i<10;i++){
             playerGrid.getColumnConstraints().add(new ColumnConstraints(50));
             playerGrid.getRowConstraints().add(new RowConstraints(50));
@@ -39,54 +73,67 @@ public class BoardView{
         }
         for(int i = 0;i<10;i++){
             for(int j =0;j<10;j++){
-                Cell button = new Cell();
-                button.setPrefHeight(50);
-                button.setPrefWidth(50);
-                setConstraints(button,j,i);
-                playerGrid.getChildren().add(button);
+                Cell cell = new Cell();
+                cell.setPrefHeight(50);
+                cell.setPrefWidth(50);
+                setConstraints(cell,j,i);
+                playerGrid.getChildren().add(cell);
 
-                button.setOnAction(actionEvent -> {
-                    System.out.println("Row" + getRowIndex(button));
-                    System.out.println("Column" + getColumnIndex(button));
-                    placeShip(new Ship(5,false),getRowIndex(button),getColumnIndex(button));
+                cell.setOnAction(actionEvent -> {
+                    System.out.println("Row" + getRowIndex(cell));
+                    System.out.println("Column" + getColumnIndex(cell));
+                    placeShip(new Ship(5,true),getRowIndex(cell),getColumnIndex(cell));
                     //button.setStyle("-fx-background-color: black;");
                 });
             }
         }
         for(int i = 0;i<10;i++){
             for(int j =0;j<10;j++){
-                Cell button = new Cell();
-                button.setPrefHeight(50);
-                button.setPrefWidth(50);
-                setConstraints(button,j,i);
-                enemyGrid.getChildren().add(button);
+                Cell cell = new Cell();
+                cell.setPrefHeight(50);
+                cell.setPrefWidth(50);
+                setConstraints(cell,j,i);
+                enemyGrid.getChildren().add(cell);
 
-                button.setOnAction(actionEvent -> {
-                    System.out.println("Row" + getRowIndex(button));
-                    System.out.println("Column" + getColumnIndex(button));
-                    button.setStyle("-fx-background-color: black;");
+                cell.setOnAction(actionEvent -> {
+                    System.out.println("Row" + getRowIndex(cell));
+                    System.out.println("Column" + getColumnIndex(cell));
+                    cell.setStyle("-fx-background-color: black;");
                 });
             }
         }
-        main.setBottom(playerGrid);
-        main.setCenter(spacer);
-        main.setTop(enemyGrid);
+
+        playerAnchor.getChildren().add(playerGrid);
+        enemyAnchor.getChildren().add(enemyGrid);
+        menuAnchor.getChildren().add(menu);
+        grids.getChildren().addAll(enemyAnchor,playerAnchor);
+        //main.setBottom(playerGrid);
+        main.setCenter(grids);
+       // main.setTop(enemyGrid);
+        main.setLeft(menuAnchor);
 
     }
     public boolean placeShip(Ship ship, int x, int y) {
         if (canPlaceShip(ship, x, y)) {
             int length = ship.length;
 
+            VBox vBox ;
+            AnchorPane anchorPane ;
+            GridPane playerGrid;
+            vBox = (VBox)main.getCenter();
+            anchorPane = (AnchorPane) vBox.getChildren().get(1);
+            playerGrid = (GridPane) anchorPane.getChildren().get(0);
+
             if (ship.orientation) {
                 for (int i = y; i < y + length; i++) {
-                    Cell cell = (Cell) getCellFromGridPane((GridPane) main.getBottom(),x, i);
+                    Cell cell = (Cell) getCellFromGridPane(playerGrid,x, i);
                     cell.ship = ship;
                         cell.setStyle("-fx-background-color: green;");
                 }
             }
             else {
                 for (int i = x; i < x + length; i++) {
-                    Cell cell = (Cell) getCellFromGridPane((GridPane) main.getBottom(),i, y);
+                    Cell cell = (Cell) getCellFromGridPane(playerGrid,i, y);
                     cell.ship = ship;
                     cell.setStyle("-fx-background-color: green;");
 
@@ -100,17 +147,25 @@ public class BoardView{
     }
     private boolean canPlaceShip(Ship ship, int x, int y) {
         int length = ship.length;
+
+        VBox vBox ;
+        AnchorPane anchorPane ;
+        GridPane playerGrid;
+        vBox = (VBox)main.getCenter();
+        anchorPane = (AnchorPane) vBox.getChildren().get(1);
+        playerGrid = (GridPane) anchorPane.getChildren().get(0);
+
         if(ship.orientation) {
             for (int i = y; i < y + length; i++) {
                 if(!isValidPoint(x,i))
                     return false;
-                Cell cell = (Cell) getCellFromGridPane((GridPane) main.getBottom(), x, i);
+                Cell cell = (Cell) getCellFromGridPane(playerGrid, x, i);
 
                     if (cell.ship != null) {
                         return false;
                     }
 
-                for (Cell neighbor : getNeighbors((GridPane) main.getBottom(),x, i)) {
+                for (Cell neighbor : getNeighbors(playerGrid,x, i)) {
                     if(!isValidPoint(x,i)) {
                         return false;
                     }
@@ -126,13 +181,13 @@ public class BoardView{
             for (int i = x; i < x + length; i++) {
                 if(!isValidPoint(i,y))
                     return false;
-                Cell cell = (Cell) getCellFromGridPane((GridPane) main.getBottom(), i, y);
+                Cell cell = (Cell) getCellFromGridPane(playerGrid, i, y);
 
                     if (cell.ship != null) {
                         return false;
                     }
 
-                for (Cell neighbor : getNeighbors((GridPane) main.getBottom(),i, y)) {
+                for (Cell neighbor : getNeighbors(playerGrid,i, y)) {
                     if(!isValidPoint(i,y))
                         return false;
 
@@ -167,7 +222,7 @@ public class BoardView{
                 new Point2D(x, y + 1)
         };
 
-        List<Cell> neighbors = new ArrayList<Cell>();
+        List<Cell> neighbors = new ArrayList<>();
 
         for (Point2D p : points) {
             if(isValidPoint(p)) {
