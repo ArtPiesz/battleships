@@ -4,6 +4,8 @@ import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.*;
 
 import java.util.ArrayList;
@@ -32,10 +34,33 @@ public class BoardView{
     private void createGrid() {
         Ship ship = new Ship(0,true);
         VBox grids = new VBox();
+        VBox menus = new VBox();
         grids.setSpacing(25);
         AnchorPane playerAnchor = new AnchorPane();
         AnchorPane enemyAnchor = new AnchorPane();
         AnchorPane menuAnchor = new AnchorPane();
+        AnchorPane orientAnchor = new AnchorPane();
+        ToggleGroup menuToggle = new ToggleGroup();
+
+        ToggleGroup orientToggle = new ToggleGroup();
+        ToggleButton horizontal = new ToggleButton();
+        horizontal.setPrefWidth(100);
+        horizontal.setPrefHeight(50);
+        horizontal.setText("---");
+        ToggleButton vertical = new ToggleButton();
+        vertical.setPrefWidth(100);
+        vertical.setPrefHeight(50);
+        vertical.setText("|");
+
+        vertical.setOnAction(actionEvent -> {
+            ship.setOrientation(false);
+
+        });
+
+        horizontal.setOnAction(actionEvent -> {
+            ship.setOrientation(true);
+
+        });
 
         GridPane playerGrid = new GridPane();
         AnchorPane.setBottomAnchor(playerGrid,0.0);
@@ -49,29 +74,31 @@ public class BoardView{
 
         VBox menu = new VBox();
         Label shipChoosing = new Label();
-        shipChoosing.setText("Choose ship lenght: ");
+        shipChoosing.setText("Choose ship length and orientation: ");
         menu.getChildren().add(shipChoosing);
         menu.setSpacing(25);
         AnchorPane.setTopAnchor(menu,400.0);
-        AnchorPane.setBottomAnchor(menu,400.0);
-        AnchorPane.setLeftAnchor(menu,0.0);
+        AnchorPane.setBottomAnchor(menu,00.0);
+        AnchorPane.setLeftAnchor(menu,70.0);
 
 
 
         for(int i=1; i < 5; i++)
         {
-            Button shipType = new Button();
+            ToggleButton shipType = new ToggleButton();
             shipType.setPrefHeight(50);
             shipType.setPrefWidth(100);
             shipType.setText(String.valueOf(i+1));
 
             shipType.setOnAction(actionEvent -> {
-
                 ship.setLength(parseInt(shipType.getText()));
-                ship.setOrientation(true);
+
             });
+            shipType.setToggleGroup(menuToggle);
             menu.getChildren().add(shipType);
         }
+
+
 
         for(int i=0;i<10;i++){
             playerGrid.getColumnConstraints().add(new ColumnConstraints(50));
@@ -106,7 +133,7 @@ public class BoardView{
                 cell.setOnAction(actionEvent -> {
                     System.out.println("Row" + getRowIndex(cell));
                     System.out.println("Column" + getColumnIndex(cell));
-                    cell.setStyle("-fx-background-color: black;");
+                    cell.setStyle("-fx-background-color: blue;");
                 });
             }
         }
@@ -114,9 +141,22 @@ public class BoardView{
         playerAnchor.getChildren().add(playerGrid);
         enemyAnchor.getChildren().add(enemyGrid);
         menuAnchor.getChildren().add(menu);
+
+        HBox orient = new HBox();
+        orient.setSpacing(50);
+        //AnchorPane.setTopAnchor(orient,500.0);
+        //AnchorPane.setBottomAnchor(orient,300.0);
+        //AnchorPane.setLeftAnchor(orient,50.0);
+        horizontal.setToggleGroup(orientToggle);
+        vertical.setToggleGroup(orientToggle);
+        orient.getChildren().addAll(horizontal,vertical);
+
+        orientAnchor.getChildren().add(orient);
         grids.getChildren().addAll(enemyAnchor,playerAnchor);
+        Label spacer = new Label();
+        menus.getChildren().addAll(menuAnchor,spacer,orientAnchor);
         main.setCenter(grids);
-        main.setLeft(menuAnchor);
+        main.setLeft(menus);
 
     }
     public boolean placeShip(Ship ship, int x, int y) {
@@ -134,14 +174,14 @@ public class BoardView{
                 for (int i = y; i < y + length; i++) {
                     Cell cell = (Cell) getCellFromGridPane(playerGrid,x, i);
                     cell.ship = ship;
-                        cell.setStyle("-fx-background-color: green;");
+                        cell.setStyle("-fx-background-color: black;");
                 }
             }
             else {
                 for (int i = x; i < x + length; i++) {
                     Cell cell = (Cell) getCellFromGridPane(playerGrid,i, y);
                     cell.ship = ship;
-                    cell.setStyle("-fx-background-color: green;");
+                    cell.setStyle("-fx-background-color: black;");
 
                 }
             }

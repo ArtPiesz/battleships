@@ -20,7 +20,7 @@ public class Ship extends Parent {
     public void setLength(int length) {
         this.length = length;
     }
-    public void setOrientation(boolean orientaton) {
+    public void setOrientation(boolean orientation) {
         this.orientation = orientation;
     }
     public int getLength() {
