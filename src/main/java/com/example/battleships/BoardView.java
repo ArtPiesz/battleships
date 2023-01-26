@@ -9,6 +9,7 @@ import javafx.scene.layout.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Integer.parseInt;
 import static javafx.scene.layout.GridPane.*;
 
 
@@ -29,7 +30,7 @@ public class BoardView{
 
     }
     private void createGrid() {
-
+        Ship ship = new Ship(0,true);
         VBox grids = new VBox();
         grids.setSpacing(25);
         AnchorPane playerAnchor = new AnchorPane();
@@ -63,8 +64,15 @@ public class BoardView{
             shipType.setPrefHeight(50);
             shipType.setPrefWidth(100);
             shipType.setText(String.valueOf(i+1));
+
+            shipType.setOnAction(actionEvent -> {
+
+                ship.setLength(parseInt(shipType.getText()));
+                ship.setOrientation(true);
+            });
             menu.getChildren().add(shipType);
         }
+
         for(int i=0;i<10;i++){
             playerGrid.getColumnConstraints().add(new ColumnConstraints(50));
             playerGrid.getRowConstraints().add(new RowConstraints(50));
@@ -82,7 +90,7 @@ public class BoardView{
                 cell.setOnAction(actionEvent -> {
                     System.out.println("Row" + getRowIndex(cell));
                     System.out.println("Column" + getColumnIndex(cell));
-                    placeShip(new Ship(5,true),getRowIndex(cell),getColumnIndex(cell));
+                    placeShip(ship,getRowIndex(cell),getColumnIndex(cell));
                     //button.setStyle("-fx-background-color: black;");
                 });
             }
@@ -107,15 +115,13 @@ public class BoardView{
         enemyAnchor.getChildren().add(enemyGrid);
         menuAnchor.getChildren().add(menu);
         grids.getChildren().addAll(enemyAnchor,playerAnchor);
-        //main.setBottom(playerGrid);
         main.setCenter(grids);
-       // main.setTop(enemyGrid);
         main.setLeft(menuAnchor);
 
     }
     public boolean placeShip(Ship ship, int x, int y) {
         if (canPlaceShip(ship, x, y)) {
-            int length = ship.length;
+            int length = ship.getLength();
 
             VBox vBox ;
             AnchorPane anchorPane ;
@@ -124,7 +130,7 @@ public class BoardView{
             anchorPane = (AnchorPane) vBox.getChildren().get(1);
             playerGrid = (GridPane) anchorPane.getChildren().get(0);
 
-            if (ship.orientation) {
+            if (ship.getOrientation()) {
                 for (int i = y; i < y + length; i++) {
                     Cell cell = (Cell) getCellFromGridPane(playerGrid,x, i);
                     cell.ship = ship;
@@ -146,7 +152,7 @@ public class BoardView{
         return false;
     }
     private boolean canPlaceShip(Ship ship, int x, int y) {
-        int length = ship.length;
+        int length = ship.getLength();
 
         VBox vBox ;
         AnchorPane anchorPane ;
@@ -155,7 +161,7 @@ public class BoardView{
         anchorPane = (AnchorPane) vBox.getChildren().get(1);
         playerGrid = (GridPane) anchorPane.getChildren().get(0);
 
-        if(ship.orientation) {
+        if(ship.getOrientation()) {
             for (int i = y; i < y + length; i++) {
                 if(!isValidPoint(x,i))
                     return false;
