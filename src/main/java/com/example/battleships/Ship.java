@@ -14,9 +14,10 @@ public class Ship extends Parent {
     public void hit(){
         if(isAlive())
             hp--;
-
     }
-
+    public boolean isAlive(){
+        return hp > 0;
+    }
     public void setLength(int length) {
         this.length = length;
     }
@@ -30,9 +31,7 @@ public class Ship extends Parent {
         return orientation;
     }
 
-    public boolean isAlive(){
-        return hp > 0;
-    }
+
 
 
 }

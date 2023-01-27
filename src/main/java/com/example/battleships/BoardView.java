@@ -2,7 +2,6 @@ package com.example.battleships;
 
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
@@ -16,21 +15,17 @@ import static javafx.scene.layout.GridPane.*;
 
 
 public class BoardView{
+    public int shipsLeft = 5;
+    public int shipsToPlace = 5;
     private BorderPane main;
     public BoardView(){
         main = new BorderPane();
-        main.setStyle("-fx-background-color: grey;");
+        main.setStyle("-fx-background-color: white;");
         main.setPrefHeight(500);
         main.setPrefWidth(500);
         createGrid();
     }
-    public class Cell extends Button {
-        public int x, y;
-        public Ship ship = null;
-        public boolean wasShot = false;
-        private BoardView board;
 
-    }
     private void createGrid() {
         Ship ship = new Ship(0,true);
         VBox grids = new VBox();
@@ -39,7 +34,6 @@ public class BoardView{
         AnchorPane playerAnchor = new AnchorPane();
         AnchorPane enemyAnchor = new AnchorPane();
         AnchorPane menuAnchor = new AnchorPane();
-        AnchorPane orientAnchor = new AnchorPane();
         ToggleGroup menuToggle = new ToggleGroup();
 
         ToggleGroup orientToggle = new ToggleGroup();
@@ -52,24 +46,18 @@ public class BoardView{
         vertical.setPrefHeight(50);
         vertical.setText("|");
 
-        vertical.setOnAction(actionEvent -> {
-            ship.setOrientation(false);
+        vertical.setOnAction(actionEvent -> ship.setOrientation(false));
 
-        });
-
-        horizontal.setOnAction(actionEvent -> {
-            ship.setOrientation(true);
-
-        });
+        horizontal.setOnAction(actionEvent -> ship.setOrientation(true));
 
         GridPane playerGrid = new GridPane();
         AnchorPane.setBottomAnchor(playerGrid,0.0);
-        AnchorPane.setLeftAnchor(playerGrid,100.0);
+        AnchorPane.setLeftAnchor(playerGrid,50.0);
 
 
         GridPane enemyGrid = new GridPane();
         AnchorPane.setTopAnchor(enemyGrid,0.0);
-        AnchorPane.setLeftAnchor(enemyGrid,100.0);
+        AnchorPane.setLeftAnchor(enemyGrid,50.0);
 
 
         VBox menu = new VBox();
@@ -90,10 +78,7 @@ public class BoardView{
             shipType.setPrefWidth(100);
             shipType.setText(String.valueOf(i+1));
 
-            shipType.setOnAction(actionEvent -> {
-                ship.setLength(parseInt(shipType.getText()));
-
-            });
+            shipType.setOnAction(actionEvent -> ship.setLength(parseInt(shipType.getText())));
             shipType.setToggleGroup(menuToggle);
             menu.getChildren().add(shipType);
         }
@@ -114,12 +99,15 @@ public class BoardView{
                 setConstraints(cell,j,i);
                 playerGrid.getChildren().add(cell);
 
+
                 cell.setOnAction(actionEvent -> {
                     System.out.println("Row" + getRowIndex(cell));
                     System.out.println("Column" + getColumnIndex(cell));
                     placeShip(ship,getRowIndex(cell),getColumnIndex(cell));
+
                     //button.setStyle("-fx-background-color: black;");
                 });
+
             }
         }
         for(int i = 0;i<10;i++){
@@ -144,17 +132,15 @@ public class BoardView{
 
         HBox orient = new HBox();
         orient.setSpacing(50);
-        //AnchorPane.setTopAnchor(orient,500.0);
-        //AnchorPane.setBottomAnchor(orient,300.0);
-        //AnchorPane.setLeftAnchor(orient,50.0);
+
         horizontal.setToggleGroup(orientToggle);
         vertical.setToggleGroup(orientToggle);
+
         orient.getChildren().addAll(horizontal,vertical);
 
-        orientAnchor.getChildren().add(orient);
         grids.getChildren().addAll(enemyAnchor,playerAnchor);
         Label spacer = new Label();
-        menus.getChildren().addAll(menuAnchor,spacer,orientAnchor);
+        menus.getChildren().addAll(menuAnchor,spacer,orient);
         main.setCenter(grids);
         main.setLeft(menus);
 
@@ -237,8 +223,9 @@ public class BoardView{
                     if(!isValidPoint(i,y))
                         return false;
 
-                        if (neighbor.ship != null)
+                        if (neighbor.ship != null) {
                             return false;
+                        }
 
                 }
             }
