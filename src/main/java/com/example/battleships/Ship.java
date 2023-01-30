@@ -2,9 +2,10 @@ package com.example.battleships;
 
 import javafx.scene.Parent;
 public class Ship extends Parent {
-    private int length;
-    private boolean orientation;
+    private final int length;
+    private final boolean orientation;
     private int hp;
+
 
     public Ship(int length,boolean orientation){
         this.length = length;
@@ -18,12 +19,7 @@ public class Ship extends Parent {
     public boolean isAlive(){
         return hp > 0;
     }
-    public void setLength(int length) {
-        this.length = length;
-    }
-    public void setOrientation(boolean orientation) {
-        this.orientation = orientation;
-    }
+
     public int getLength() {
         return length;
     }
