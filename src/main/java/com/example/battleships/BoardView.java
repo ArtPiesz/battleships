@@ -103,9 +103,9 @@ public class BoardView extends Parent {
                     if(!isValidPoint(i,y))
                         return false;
 
-                        if (neighbor.ship != null) {
-                            return false;
-                        }
+                    if (neighbor.ship != null)
+                        return false;
+
 
                 }
             }

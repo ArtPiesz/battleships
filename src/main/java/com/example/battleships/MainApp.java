@@ -10,6 +10,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.util.Random;
@@ -27,6 +28,7 @@ private BoardView enemyBoard, playerBoard;
 
  private Parent createMenu (){
      VBox vBox = new VBox();
+     vBox.getChildren().add(new Text("Choose ship length:"));
      ToggleGroup menuToggle = new ToggleGroup();
      ToggleGroup orientToggle = new ToggleGroup();
 
@@ -103,6 +105,7 @@ private BoardView enemyBoard, playerBoard;
             if (playerBoard.placeShip(new Ship(shipLength,orientation), cell.x, cell.y)) {
                 if (--shipsToPlace == 0) {
                     startGame();
+                    root.setLeft(null);
                 }
             }
         });
