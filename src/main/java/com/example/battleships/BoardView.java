@@ -55,7 +55,7 @@ public class BoardView extends Parent {
                 for (int i = x; i < x + length; i++) {
                     Cell cell = (Cell) getCellFromGridPane(board,i, y);
                     cell.ship = ship;
-                    if(!enemy)
+                     if(!enemy)
                         cell.setStyle("-fx-background-color: green;");
 
                 }
@@ -68,6 +68,9 @@ public class BoardView extends Parent {
     }
     private boolean canPlaceShip(Ship ship, int x, int y) {
         int length = ship.getLength();
+
+        if(length == 0)
+            return false;
 
         if(ship.getOrientation()) {
             for (int i = y; i < y + length; i++) {

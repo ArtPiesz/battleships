@@ -1,9 +1,12 @@
 package com.example.battleships;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.AnchorPane;
@@ -20,11 +23,49 @@ import static java.lang.Integer.parseInt;
 public class MainApp extends Application {
 private int shipsToPlace = 5;
 public boolean orientation = true;
-public int shipLength;
+public int shipLength = 0;
 private final Random random = new Random();
 private boolean running = false;
 public boolean enemyTurn = false;
 private BoardView enemyBoard, playerBoard;
+
+private final TextArea messages = new TextArea();
+private final boolean isServer = false;
+private final NetworkConnection connection = isServer ? createServer() : createClient();
+
+@Override
+public void init() throws Exception{
+connection.startConnection();
+}
+
+private Server createServer(){
+    return new Server(55555, data -> Platform.runLater(()-> messages.appendText(data.toString() + "\n")));
+}
+
+private Client createClient(){
+    return new Client("127.0.0.2",55555, data-> Platform.runLater(()-> messages.appendText(data.toString() + "\n")));
+}
+private Parent createChat(){
+    TextField input = new TextField();
+
+
+    input.setOnAction(event->{
+        String message = isServer ? "Server: " : "Client: ";
+        message+= input.getText();
+        input.clear();
+        messages.appendText(message + "\n");
+        try {
+            connection.send(message);
+        }
+        catch(Exception e){
+            messages.appendText("Failed to send" + "\n");
+        }
+    });
+    VBox root = new VBox(20,messages,input);
+    root.setPrefHeight(800);
+    root.setAlignment(Pos.CENTER_RIGHT);
+    return root;
+}
 
  private Parent createMenu (){
      VBox vBox = new VBox();
@@ -77,7 +118,7 @@ private BoardView enemyBoard, playerBoard;
         BorderPane root = new BorderPane();
         root.setPrefSize(600, 800);
         root.setLeft(createMenu());
-
+        root.setRight(createChat());
         enemyBoard = new BoardView(true, event -> {
             if (!running)
                 return;
@@ -140,14 +181,14 @@ private BoardView enemyBoard, playerBoard;
 
     private void startGame() {
         // place enemy ships
-        int type = 5;
+        int ships = 5;
 
-        while (type > 0) {
+        while (ships > 0) {
             int x = random.nextInt(10);
             int y = random.nextInt(10);
 
-            if (enemyBoard.placeShip(new Ship(type, Math.random() < 0.5), x, y)) {
-                type--;
+            if (enemyBoard.placeShip(new Ship(random.nextInt(1,5), Math.random() < 0.5), x, y)) {
+                ships--;
             }
         }
 
@@ -160,7 +201,10 @@ private BoardView enemyBoard, playerBoard;
         stage.setScene(scene);
         stage.show();
     }
-
+    @Override
+    public void stop() throws Exception{
+        connection.closeConnection();
+    }
     public static void main(String[] args){
 
         launch(args);
