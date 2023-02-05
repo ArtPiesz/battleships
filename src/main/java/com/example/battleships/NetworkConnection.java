@@ -9,20 +9,26 @@ import java.util.function.Consumer;
 
 public abstract class NetworkConnection {
     private final ConnectionThread connThread = new ConnectionThread();
+
     private final Consumer <Serializable> onReceiveCallback;
     public NetworkConnection(Consumer<Serializable> onReceiveCallback){
         this.onReceiveCallback=onReceiveCallback;
         connThread.setDaemon(true);
+
     }
 
     public void startConnection() throws Exception{
         connThread.start();
+
     }
     public void send(Serializable data) throws Exception{
         connThread.out.writeObject(data);
+
     }
+
     public void closeConnection() throws Exception{
         connThread.socket.close();
+
     }
     protected abstract boolean isServer();
     protected abstract String getIP();

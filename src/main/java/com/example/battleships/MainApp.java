@@ -23,7 +23,7 @@ import static java.lang.Integer.parseInt;
 public class MainApp extends Application {
 private int shipsToPlace = 5;
 public boolean orientation = true;
-public int shipLength = 0;
+public int shipLength = 2;
 private final Random random = new Random();
 private boolean running = false;
 public boolean enemyTurn = false;
@@ -31,6 +31,7 @@ private BoardView enemyBoard, playerBoard;
 
 private final TextArea messages = new TextArea();
 private final boolean isServer = false;
+//private final boolean isServer = true;
 private final NetworkConnection connection = isServer ? createServer() : createClient();
 
 @Override
@@ -39,18 +40,38 @@ connection.startConnection();
 }
 
 private Server createServer(){
-    return new Server(55555, data -> Platform.runLater(()-> messages.appendText(data.toString() + "\n")));
+    return new Server(55555, data ->
+    {
+        String[] check = data.toString().split(" ");
+        if(check[0].equals("%"))
+        {
+            enemyBoard.placeShip(new Ship(Integer.parseInt(check[3]), Boolean.parseBoolean(check[4])), Integer.parseInt(check[1]), Integer.parseInt(check[2]));
+        }
+        else
+            Platform.runLater(()-> messages.appendText(data + "\n"));
+
+    });
+
 }
 
 private Client createClient(){
-    return new Client("127.0.0.2",55555, data-> Platform.runLater(()-> messages.appendText(data.toString() + "\n")));
+    return new Client("127.0.0.1",55555, data-> {
+
+        String[] check = data.toString().split(" ");
+        if(check[0].equals("%"))
+        {
+            enemyBoard.placeShip(new Ship(Integer.parseInt(check[3]), Boolean.parseBoolean(check[4])), Integer.parseInt(check[1]), Integer.parseInt(check[2]));
+        }
+        else
+            Platform.runLater(()-> messages.appendText(data + "\n"));
+    });
 }
 private Parent createChat(){
     TextField input = new TextField();
 
 
     input.setOnAction(event->{
-        String message = isServer ? "Server: " : "Client: ";
+        String message = isServer ? "Player1: " : "Player2: ";
         message+= input.getText();
         input.clear();
         messages.appendText(message + "\n");
@@ -144,8 +165,9 @@ private Parent createChat(){
 
             Cell cell = (Cell) event.getSource();
             if (playerBoard.placeShip(new Ship(shipLength,orientation), cell.x, cell.y)) {
+                startGame(cell);
                 if (--shipsToPlace == 0) {
-                    startGame();
+                    running = true;
                     root.setLeft(null);
                 }
             }
@@ -179,9 +201,18 @@ private Parent createChat(){
         }
     }
 
-    private void startGame() {
+    private void startGame(Cell cell) {
+        String data;
+        data =  "%" + " " + cell.x +" "+ cell.y + " " + shipLength + " " + orientation;
+        try {
+            connection.send(data);
+        }
+        catch(Exception e){
+            messages.appendText("Failed to send" + "\n");
+        }
+
         // place enemy ships
-        int ships = 5;
+        /*int ships = 5;
 
         while (ships > 0) {
             int x = random.nextInt(10);
@@ -190,9 +221,8 @@ private Parent createChat(){
             if (enemyBoard.placeShip(new Ship(random.nextInt(1,5), Math.random() < 0.5), x, y)) {
                 ships--;
             }
-        }
+        }*/
 
-        running = true;
     }
     @Override
     public void start(Stage stage) {
