@@ -16,17 +16,15 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import java.util.Random;
-
 import static java.lang.Integer.parseInt;
 
 public class MainApp extends Application {
 private int shipsToPlace = 5;
 public boolean orientation = true;
-public int shipLength = 2;
-private final Random random = new Random();
+public int shipLength;
 private boolean running = false;
 public boolean enemyTurn = false;
+public Cell enemyShoot;
 private BoardView enemyBoard, playerBoard;
 
 private final TextArea messages = new TextArea();
@@ -43,13 +41,15 @@ private Server createServer(){
     return new Server(55555, data ->
     {
         String[] check = data.toString().split(" ");
-        if(check[0].equals("%"))
-        {
+        if(check[0].equals("%")) {
             enemyBoard.placeShip(new Ship(Integer.parseInt(check[3]), Boolean.parseBoolean(check[4])), Integer.parseInt(check[1]), Integer.parseInt(check[2]));
+        }
+        else if(check[0].equals("#")) {
+            enemyShoot =((Cell) playerBoard.getCellFromGridPane((playerBoard.getGridFromBoardView(playerBoard)),Integer.parseInt(check[1]),Integer.parseInt(check[2])));
+            enemyTurn=!enemyShoot.shoot();
         }
         else
             Platform.runLater(()-> messages.appendText(data + "\n"));
-
     });
 
 }
@@ -59,8 +59,11 @@ private Client createClient(){
 
         String[] check = data.toString().split(" ");
         if(check[0].equals("%"))
-        {
             enemyBoard.placeShip(new Ship(Integer.parseInt(check[3]), Boolean.parseBoolean(check[4])), Integer.parseInt(check[1]), Integer.parseInt(check[2]));
+
+        else if(check[0].equals("#")){
+            enemyShoot =((Cell) playerBoard.getCellFromGridPane((playerBoard.getGridFromBoardView(playerBoard)),Integer.parseInt(check[1]),Integer.parseInt(check[2])));
+            enemyTurn = !enemyShoot.shoot();
         }
         else
             Platform.runLater(()-> messages.appendText(data + "\n"));
@@ -145,6 +148,7 @@ private Parent createChat(){
                 return;
 
             Cell cell = (Cell) event.getSource();
+            sendCell(cell);
             if (cell.wasShot)
                 return;
 
@@ -165,27 +169,25 @@ private Parent createChat(){
 
             Cell cell = (Cell) event.getSource();
             if (playerBoard.placeShip(new Ship(shipLength,orientation), cell.x, cell.y)) {
-                startGame(cell);
+                sendShip(cell);
                 if (--shipsToPlace == 0) {
                     running = true;
                     root.setLeft(null);
                 }
             }
         });
-
         VBox vboxBoard = new VBox(50, enemyBoard, playerBoard);
         vboxBoard.setAlignment(Pos.CENTER);
         VBox vboxMenu = new VBox(50,createMenu());
         vboxMenu.setAlignment(Pos.CENTER);
         root.setCenter(vboxBoard);
         root.setLeft(vboxMenu);
-
         return root;
     }
     private void enemyMove() {
         while (enemyTurn) {
-            int x = random.nextInt(10);
-            int y = random.nextInt(10);
+            int x = enemyShoot.x;
+            int y = enemyShoot.y;
             GridPane playerGrid= playerBoard.getGridFromBoardView(playerBoard);
 
             Cell cell = (Cell)playerBoard.getCellFromGridPane(playerGrid,x,y);
@@ -201,7 +203,7 @@ private Parent createChat(){
         }
     }
 
-    private void startGame(Cell cell) {
+    private void sendShip(Cell cell) {
         String data;
         data =  "%" + " " + cell.x +" "+ cell.y + " " + shipLength + " " + orientation;
         try {
@@ -210,19 +212,16 @@ private Parent createChat(){
         catch(Exception e){
             messages.appendText("Failed to send" + "\n");
         }
-
-        // place enemy ships
-        /*int ships = 5;
-
-        while (ships > 0) {
-            int x = random.nextInt(10);
-            int y = random.nextInt(10);
-
-            if (enemyBoard.placeShip(new Ship(random.nextInt(1,5), Math.random() < 0.5), x, y)) {
-                ships--;
-            }
-        }*/
-
+    }
+    private void sendCell(Cell cell) {
+        String data;
+        data =  "#" + " " + cell.x +" "+ cell.y;
+        try {
+            connection.send(data);
+        }
+        catch(Exception e){
+            messages.appendText("Failed to send" + "\n");
+        }
     }
     @Override
     public void start(Stage stage) {
